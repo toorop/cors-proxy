@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -24,8 +26,14 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	URL, err := base64.StdEncoding.DecodeString(u[0])
+	if err != nil {
+		OutError(w, http.StatusBadRequest, fmt.Sprintf("400 - bad URL %s; %v", u[0], err))
+		return
+	}
+
 	// validate URL
-	_, err := url.ParseRequestURI(u[0])
+	_, err = url.ParseRequestURI(string(URL))
 	if err != nil {
 		OutError(w, http.StatusBadRequest, "400 - bad URL")
 		return
@@ -37,12 +45,16 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"
 	}
 	client := http.Client{}
-	request, err := http.NewRequest("GET", u[0], nil)
+	request, err := http.NewRequest("GET", string(URL), nil)
 	if err != nil {
 		OutError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	request.Header.Set("referer", "referer: https://www.ovh.com/manager/dedicated/index.html")
+	// referer
+	if r.Header.Get("referer") != "" {
+		request.Header.Set("referer", r.Header.Get("referer"))
+	}
+
 	request.Header.Set("user-agent", userAgent)
 
 	response, err := client.Do(request)
@@ -53,8 +65,11 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	defer response.Body.Close()
 
 	// reply
-	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	for k, v := range response.Header {
+		if k == "Access-Control-Allow-Origin" {
+			continue
+		}
 		for _, s := range v {
 			w.Header().Add(k, s)
 		}
@@ -76,7 +91,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", proxyHandler)
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8081", nil); err != nil {
 		panic(err)
 	}
 }

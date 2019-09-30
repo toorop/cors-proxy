@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+go build -o ovhcors
+
+rsync -rvz ovhcors root@toorop.fr:/var/www/cors.ovh/
