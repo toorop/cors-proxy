@@ -1,5 +1,8 @@
 build:
-	go build -o corsserver
+	go build -o anticors
 
 run: build
-	./corsserver
+	./anticors
+
+deploy: build
+	rsync -rvz anticors root@toorop.fr:/var/www/anticors.toorop.fr/
