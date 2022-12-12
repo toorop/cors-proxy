@@ -1,8 +1,8 @@
 build:
-	go build -o anticors
+	go build -o ovhcors
 
 run: build
-	./anticors
+	./ovhcors
 
 deploy: build
-	rsync -rvz anticors root@toorop.fr:/var/www/anticors.toorop.fr/
+	rsync -rvz ovhcors root@toorop.fr:/var/www/cors.dpp.st/
