@@ -4,4 +4,4 @@ set -e
 
 go build -o ovhcors
 
-rsync -rvz ovhcors root@dpp.st:/var/www/cors.ovh/
+rsync -rvz ovhcors root@dpp.st:/var/www/cors.dpp.st/

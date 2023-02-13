@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,14 +24,15 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	URL, err := base64.StdEncoding.DecodeString(u[0])
+	/*URL, err := base64.StdEncoding.DecodeString(u[0])
 	if err != nil {
 		OutError(w, http.StatusBadRequest, fmt.Sprintf("400 - bad URL %s; %v", u[0], err))
 		return
-	}
+	}*/
+	URL := u[0]
 
 	// validate URL
-	_, err = url.ParseRequestURI(string(URL))
+	_, err := url.ParseRequestURI(string(URL))
 	if err != nil {
 		OutError(w, http.StatusBadRequest, "400 - bad URL")
 		return
